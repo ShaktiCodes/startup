@@ -1,0 +1,60 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  pitches       Pitch[]
+}
+
+model Pitch {
+  id             String           @id @default(cuid())
+  title          String
+  content        String           @db.Text
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  analyses       PitchAnalysis[]
+  investorType   String?
+  isPublic       Boolean          @default(false)
+}
+
+model PitchAnalysis {
+  id                String   @id @default(cuid())
+  pitchId           String
+  pitch             Pitch    @relation(fields: [pitchId], references: [id], onDelete: Cascade)
+  overallScore      Int
+  clarityScore      Int
+  persuasivenessScore Int
+  investorAppealScore Int
+  feedback          Json
+  improvedPitch     String   @db.Text
+  elevatorPitch     String   @db.Text
+  createdAt         DateTime @default(now())
+}
+
+model InvestorProfile {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  preferences Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
